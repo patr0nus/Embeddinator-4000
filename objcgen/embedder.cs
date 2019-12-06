@@ -244,7 +244,7 @@ namespace Embeddinator.ObjC
 
 			Console.WriteLine ("Processing assemblies...");
 			var p = new ObjCProcessor ();
-			p.Process (Assemblies.Select (x => new ProcessedAssembly (x) { UserCode = true}));
+			p.Process (Assemblies.Select ((x, i) => new ProcessedAssembly (x) { UserCode = i == 0}));
 
 			Console.WriteLine ("Generating binding code...");
 			var g = new ObjCGenerator () {
@@ -685,8 +685,14 @@ namespace Embeddinator.ObjC
 							mmp.Append ($"--sdkroot {XcodeApp} ");
 							mmp.Append ($"--minos {build_info.MinVersion} ");
 							mmp.Append ($"--embeddinator ");
-							foreach (var asm in Assemblies)
-								mmp.Append (Utils.Quote (Path.GetFullPath (asm.Location))).Append (" ");
+
+                            for (int i = 0; i < Assemblies.Count; i++)
+                            {
+                                mmp.Append(i == 0 ? "--root-assembly=" : "-a:");// Mark the first asm in Assemblies as root assembly
+                                var asm = Assemblies[i];
+                                mmp.Append(Utils.Quote(Path.GetFullPath(asm.Location))).Append(" ");
+                            }
+
 							mmp.Append ($"-a:{GetPlatformAssembly ()} ");
 							mmp.Append ($"--sdk {GetSdkVersion (build_info.Sdk.ToLower ())} ");
 							// FIXME: once merged add support for linking the platform (Xamarin.Mac.dll)

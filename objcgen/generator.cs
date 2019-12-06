@@ -24,7 +24,7 @@ namespace Embeddinator.ObjC {
 			icomparable = op.icomparable;
 
 			foreach (var a in Processor.Assemblies) {
-				Generate (a);
+				if (a.UserCode) Generate (a);
 			}
 		}
 
